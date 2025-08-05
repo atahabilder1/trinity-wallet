@@ -40,3 +40,25 @@ Thumbs.db
 *.pem
 *.key
 secrets/
+
+# Extension builds
+*.crx
+*.xpi
+*.zip
+
+# Mobile
+*.apk
+*.ipa
+ios/Pods/
+android/.gradle/
+
+# Electron
+release/
+
+# Wallet specific - NEVER commit
+mnemonic.txt
+seed.txt
+*.keystore
+
+# Lock files (optional, some prefer to commit these)
+# pnpm-lock.yaml
