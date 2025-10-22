@@ -200,12 +200,12 @@ Found a security issue? Please email security@trinity-wallet.dev (do not open a 
 
 ## Roadmap
 
-### Phase 1-5: Core + Extension (Current)
+### Phase 1-5: Core + Extension (Completed)
 - [x] Project architecture
-- [ ] HD wallet implementation
-- [ ] Privacy layer (stealth addresses, Tor)
-- [ ] Browser extension
-- [ ] DApp integration
+- [x] HD wallet implementation
+- [x] Privacy layer (stealth addresses, RPC rotation)
+- [x] Browser extension
+- [x] DApp integration
 
 ### Phase 6: Advanced Features
 - [ ] Transaction simulation
