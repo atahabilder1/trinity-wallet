@@ -37,5 +37,11 @@ export * from './privacy/stealth';
 export * from './privacy/rotation';
 export * from './privacy/rpc-privacy';
 
+// Simulation
+export * from './simulation/simulator';
+export * from './simulation/decoder';
+export * from './simulation/risk';
+export * from './simulation/types';
+
 // Version
 export const VERSION = '0.1.0';
