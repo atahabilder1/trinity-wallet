@@ -43,5 +43,12 @@ export * from './simulation/decoder';
 export * from './simulation/risk';
 export * from './simulation/types';
 
+// Portfolio
+export * from './portfolio/types';
+export * from './portfolio/prices';
+export * from './portfolio/tracker';
+export * from './portfolio/history';
+export * from './portfolio/analytics';
+
 // Version
 export const VERSION = '0.1.0';
