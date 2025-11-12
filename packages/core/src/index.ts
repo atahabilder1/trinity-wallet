@@ -50,5 +50,12 @@ export * from './portfolio/tracker';
 export * from './portfolio/history';
 export * from './portfolio/analytics';
 
+// Recovery
+export * from './recovery/types';
+export * from './recovery/shamir';
+export * from './recovery/guardian';
+export * from './recovery/recovery';
+export * from './recovery/zkproof';
+
 // Version
 export const VERSION = '0.1.0';
