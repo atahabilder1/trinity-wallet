@@ -57,5 +57,12 @@ export * from './recovery/guardian';
 export * from './recovery/recovery';
 export * from './recovery/zkproof';
 
+// Railgun (ZK Transactions)
+export * from './railgun/types';
+export * from './railgun/client';
+export * from './railgun/wallet';
+export * from './railgun/transactions';
+export * from './railgun/shield';
+
 // Version
 export const VERSION = '0.1.0';
