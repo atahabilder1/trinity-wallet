@@ -207,15 +207,15 @@ Found a security issue? Please email security@trinity-wallet.dev (do not open a 
 - [x] Browser extension
 - [x] DApp integration
 
-### Phase 6: Advanced Features
-- [ ] Transaction simulation
-- [ ] ZK social recovery
-- [ ] Railgun integration
-- [ ] Portfolio dashboard
+### Phase 6: Advanced Features (Completed)
+- [x] Transaction simulation
+- [x] ZK social recovery
+- [x] Railgun integration
+- [x] Portfolio dashboard
 
-### Phase 7: Mobile + Desktop
-- [ ] React Native app
-- [ ] Electron desktop app
+### Phase 7: Mobile + Desktop (Completed)
+- [x] React Native app
+- [x] Electron desktop app
 
 ### Future
 - Intent-based transactions
