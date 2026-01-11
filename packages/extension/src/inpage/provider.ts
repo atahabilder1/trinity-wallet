@@ -181,8 +181,8 @@ class TrinityProvider extends EventEmitter {
       .catch(error => callback(error));
   }
 
-  // Connection check
-  isConnected(): boolean {
+  // Connection check (method for EIP-1193 compatibility)
+  getConnectionState(): boolean {
     return this.isConnected;
   }
 }

@@ -5,7 +5,7 @@
  */
 
 import { Contract, JsonRpcProvider, Wallet as EthersWallet } from 'ethers';
-import { sha256 } from '../crypto/hashing';
+import { sha256Hex, hashSha256 } from '../crypto/hashing';
 import { getRandomBytes, bytesToHex } from '../crypto/random';
 import type {
   PrivateTransferRequest,
@@ -75,7 +75,7 @@ export class RailgunTransactionBuilder {
 
     // Generate nullifiers for input UTXOs
     const nullifiers = inputUtxos.map(utxo =>
-      sha256(utxo.commitment + wallet.spendingKey)
+      sha256Hex(utxo.commitment + wallet.spendingKey)
     );
 
     this.emitProgress('proving', 50, 'Creating output commitments...');
@@ -240,7 +240,7 @@ export class RailgunTransactionBuilder {
 
     // Main output to recipient
     const recipientBlinding = bytesToHex(getRandomBytes(32));
-    const recipientCommitment = sha256(
+    const recipientCommitment = sha256Hex(
       recipientAddress + tokenAddress + amount + recipientBlinding
     );
     commitments.push({ hash: recipientCommitment, blinding: recipientBlinding });
@@ -248,7 +248,7 @@ export class RailgunTransactionBuilder {
     // Change output to sender (if any)
     if (changeAmount > 0n) {
       const changeBlinding = bytesToHex(getRandomBytes(32));
-      const changeCommitment = sha256(
+      const changeCommitment = sha256Hex(
         senderAddress + tokenAddress + changeAmount.toString() + changeBlinding
       );
       commitments.push({ hash: changeCommitment, blinding: changeBlinding });

@@ -5,7 +5,7 @@
 
 import { secp256k1 } from '@noble/curves/secp256k1';
 import { hexToBytes, bytesToHex, secureWipe } from '../crypto/random';
-import { hashKeccak256, publicKeyToAddress, hashMessage } from '../crypto/hashing';
+import { publicKeyToAddress, hashMessage } from '../crypto/hashing';
 import { HDWallet, type DerivedAccount } from './hdwallet';
 import { AccountType } from './account';
 

@@ -20,6 +20,15 @@ export function hashSha256(data: string | Uint8Array): Uint8Array {
 }
 
 /**
+ * SHA-256 hash returning hex string
+ * @param data Data to hash (string or Uint8Array)
+ * @returns Hash as hex string
+ */
+export function sha256Hex(data: string | Uint8Array): string {
+  return bytesToHex(hashSha256(data));
+}
+
+/**
  * SHA-512 hash
  * @param data Data to hash (string or Uint8Array)
  * @returns Hash as Uint8Array
@@ -133,5 +142,8 @@ export function hashMessage(message: string | Uint8Array): Uint8Array {
 
   return hashKeccak256(combined);
 }
+
+// Re-export sha256 for direct use
+export { sha256 } from '@noble/hashes/sha256';
 
 export { bytesToHex, hexToBytes };

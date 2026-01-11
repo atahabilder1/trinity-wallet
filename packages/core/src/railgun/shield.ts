@@ -5,7 +5,7 @@
  */
 
 import { Contract, Wallet as EthersWallet, parseUnits } from 'ethers';
-import { sha256 } from '../crypto/hashing';
+import { sha256Hex } from '../crypto/hashing';
 import { getRandomBytes, bytesToHex } from '../crypto/random';
 import type {
   ShieldRequest,
@@ -70,7 +70,7 @@ export class ShieldManager {
 
     // Create commitment for the shielded output
     const blinding = bytesToHex(getRandomBytes(32));
-    const commitment = sha256(
+    const commitment = sha256Hex(
       recipientAddress + request.tokenAddress + request.amount + blinding
     );
 
@@ -104,7 +104,7 @@ export class ShieldManager {
       if (receipt.status === 1) {
         const utxo: UTXO = {
           commitment,
-          nullifier: sha256(commitment + wallet.spendingKey),
+          nullifier: sha256Hex(commitment + wallet.spendingKey),
           amount: request.amount,
           tokenAddress: request.tokenAddress,
           tree: 0, // Would be determined from event
@@ -152,7 +152,7 @@ export class ShieldManager {
 
     // Generate nullifiers
     const nullifiers = inputUtxos.map(utxo =>
-      sha256(utxo.commitment + wallet.spendingKey)
+      sha256Hex(utxo.commitment + wallet.spendingKey)
     );
 
     // Generate proof

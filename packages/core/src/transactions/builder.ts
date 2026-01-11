@@ -3,7 +3,7 @@
  * Constructs and prepares transactions for signing
  */
 
-import { Transaction, parseEther, formatEther, hexlify, toBeArray } from 'ethers';
+import { Transaction, parseEther, formatEther, toBeArray } from 'ethers';
 import type { ChainProvider } from '../networks/provider';
 import {
   TransactionType,

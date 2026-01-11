@@ -4,7 +4,7 @@
  * Simulates transactions using eth_call and trace APIs
  */
 
-import { JsonRpcProvider, Contract, formatUnits } from 'ethers';
+import { JsonRpcProvider, Contract } from 'ethers';
 import type {
   SimulationRequest,
   SimulationResult,
@@ -15,7 +15,7 @@ import type {
   ContractInteraction,
   TransactionTrace,
 } from './types';
-import { decodeTransactionData, decodeApproval, decodeTransfer, isUnlimitedApproval } from './decoder';
+import { decodeApproval, decodeTransfer, isUnlimitedApproval } from './decoder';
 import { analyzeRisks } from './risk';
 
 // ERC20 ABI for balance/approval checks
@@ -26,17 +26,6 @@ const ERC20_ABI = [
   'function name() view returns (string)',
   'function allowance(address,address) view returns (uint256)',
 ];
-
-// Known token addresses per chain
-const NATIVE_WRAPPED: Record<number, string> = {
-  1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
-  137: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC
-  56: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB
-  42161: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH Arbitrum
-  10: '0x4200000000000000000000000000000000000006', // WETH Optimism
-  8453: '0x4200000000000000000000000000000000000006', // WETH Base
-  43114: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', // WAVAX
-};
 
 /**
  * Transaction Simulator
@@ -66,12 +55,18 @@ export class TransactionSimulator {
       const simulationResult = await this.executeSimulation(request);
 
       if (!simulationResult.success) {
-        const riskAnalysis = analyzeRisks(request, simulationResult);
-        return {
+        const failResult: SimulationResult = {
           ...simulationResult,
-          riskLevel: riskAnalysis.level,
-          warnings: riskAnalysis.warnings,
+          balanceChanges: [],
+          tokenTransfers: [],
+          approvalChanges: [],
+          riskLevel: 'high',
+          warnings: [],
         };
+        const riskAnalysis = analyzeRisks(request, failResult);
+        failResult.riskLevel = riskAnalysis.level;
+        failResult.warnings = riskAnalysis.warnings;
+        return failResult;
       }
 
       // Get post-simulation balances (estimated)
@@ -256,7 +251,7 @@ export class TransactionSimulator {
   /**
    * Extract token transfers from transaction
    */
-  private extractTokenTransfers(request: SimulationRequest, trace?: TransactionTrace): TokenTransfer[] {
+  private extractTokenTransfers(request: SimulationRequest, _trace?: TransactionTrace): TokenTransfer[] {
     const transfers: TokenTransfer[] = [];
 
     const transfer = decodeTransfer(request.data || '');
@@ -314,7 +309,7 @@ export class TransactionSimulator {
   /**
    * Get contract information
    */
-  private async getContractInfo(address: string, chainId: number): Promise<ContractInteraction | undefined> {
+  private async getContractInfo(address: string, _chainId: number): Promise<ContractInteraction | undefined> {
     try {
       const code = await this.provider.getCode(address);
 

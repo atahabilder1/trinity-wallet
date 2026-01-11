@@ -7,7 +7,7 @@
  * This implementation provides the interface and simulated proofs
  */
 
-import { sha256 } from '../crypto/hashing';
+import { sha256Hex } from '../crypto/hashing';
 import { getRandomBytes, bytesToHex } from '../crypto/random';
 import type { ZKProof } from './types';
 
@@ -29,8 +29,8 @@ export async function createZKRecoveryProof(
   // 3. Create a groth16 proof using snarkjs
 
   // For now, create a simulated proof structure
-  const commitment = sha256(walletAddress + bytesToHex(privateKey));
-  const nullifier = sha256(commitment + PROVING_KEY_HASH);
+  const commitment = sha256Hex(walletAddress + bytesToHex(privateKey));
+  const nullifier = sha256Hex(commitment + PROVING_KEY_HASH);
 
   // Simulated proof points (would be actual elliptic curve points)
   const proof: ZKProof = {
@@ -48,7 +48,7 @@ export async function createZKRecoveryProof(
     ],
     protocol: 'groth16',
     publicInputs: [
-      sha256(walletAddress), // Wallet commitment
+      sha256Hex(walletAddress), // Wallet commitment
       nullifier, // Prevents double-use
     ],
   };
@@ -66,8 +66,8 @@ export async function createShareProof(
   shareValue: string,
   walletCommitment: string
 ): Promise<ZKProof> {
-  const shareCommitment = sha256(shareIndex.toString() + shareValue);
-  const nullifier = sha256(shareCommitment + walletCommitment);
+  const shareCommitment = sha256Hex(shareIndex.toString() + shareValue);
+  const nullifier = sha256Hex(shareCommitment + walletCommitment);
 
   const proof: ZKProof = {
     pi_a: [
@@ -146,7 +146,7 @@ export async function createMembershipProof(
   merkleRoot: string,
   merklePath: string[]
 ): Promise<ZKProof> {
-  const nullifier = sha256(guardianCommitment + merkleRoot);
+  const nullifier = sha256Hex(guardianCommitment + merkleRoot);
 
   const proof: ZKProof = {
     pi_a: [
@@ -176,7 +176,7 @@ export async function createMembershipProof(
  */
 export function computeGuardianMerkleRoot(commitments: string[]): string {
   if (commitments.length === 0) {
-    return sha256('empty');
+    return sha256Hex('empty');
   }
 
   if (commitments.length === 1) {
@@ -191,7 +191,7 @@ export function computeGuardianMerkleRoot(commitments: string[]): string {
 
     for (let i = 0; i < layer.length; i += 2) {
       if (i + 1 < layer.length) {
-        nextLayer.push(sha256(layer[i] + layer[i + 1]));
+        nextLayer.push(sha256Hex(layer[i] + layer[i + 1]));
       } else {
         nextLayer.push(layer[i]); // Odd element
       }
@@ -226,7 +226,7 @@ export function computeMerkleProof(commitments: string[], index: number): string
     const nextLayer: string[] = [];
     for (let i = 0; i < layer.length; i += 2) {
       if (i + 1 < layer.length) {
-        nextLayer.push(sha256(layer[i] + layer[i + 1]));
+        nextLayer.push(sha256Hex(layer[i] + layer[i + 1]));
       } else {
         nextLayer.push(layer[i]);
       }
@@ -253,9 +253,9 @@ export function verifyMerkleProof(
 
   for (const sibling of proof) {
     if (idx % 2 === 0) {
-      current = sha256(current + sibling);
+      current = sha256Hex(current + sibling);
     } else {
-      current = sha256(sibling + current);
+      current = sha256Hex(sibling + current);
     }
     idx = Math.floor(idx / 2);
   }
@@ -278,7 +278,7 @@ export function createCommitment(value: string, randomness?: string): {
   randomness: string;
 } {
   const r = randomness || bytesToHex(getRandomBytes(32));
-  const commitment = sha256(value + r);
+  const commitment = sha256Hex(value + r);
   return { commitment, randomness: r };
 }
 
@@ -290,5 +290,5 @@ export function verifyCommitment(
   randomness: string,
   commitment: string
 ): boolean {
-  return sha256(value + randomness) === commitment;
+  return sha256Hex(value + randomness) === commitment;
 }

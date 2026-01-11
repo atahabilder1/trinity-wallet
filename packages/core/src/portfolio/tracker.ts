@@ -14,7 +14,7 @@ import type {
 } from './types';
 import { PriceService, createPriceService } from './prices';
 import { getTokenBalances, getNativeBalance } from '../tokens/balances';
-import { CHAINS, CHAINS_BY_ID } from '../networks/chains';
+import { CHAINS_BY_ID } from '../networks/chains';
 
 const DEFAULT_CONFIG: PortfolioConfig = {
   refreshInterval: 60000, // 1 minute

@@ -67,8 +67,8 @@ export class AddressRotationManager {
   private dappAddresses: Map<string, string> = new Map(); // DApp origin -> address
 
   // Separate derivation paths for receive and change
-  private static RECEIVE_PATH_PREFIX = "m/44'/60'/0'/0"; // Standard external
-  private static CHANGE_PATH_PREFIX = "m/44'/60'/0'/1"; // Change addresses
+  public static RECEIVE_PATH_PREFIX = "m/44'/60'/0'/0"; // Standard external
+  public static CHANGE_PATH_PREFIX = "m/44'/60'/0'/1"; // Change addresses
 
   constructor(config: Partial<RotationConfig> = {}) {
     this.config = { ...DEFAULT_ROTATION_CONFIG, ...config };

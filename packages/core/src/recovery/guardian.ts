@@ -4,9 +4,9 @@
  * Manages guardians for social recovery with privacy preservation
  */
 
-import { sha256 } from '../crypto/hashing';
+import { sha256Hex } from '../crypto/hashing';
 import { encrypt, decrypt } from '../crypto/encryption';
-import { getRandomBytes, bytesToHex } from '../crypto/random';
+import { getRandomBytes, bytesToHex, hexToBytes } from '../crypto/random';
 import { splitSecret } from './shamir';
 import type {
   Guardian,
@@ -49,7 +49,7 @@ export class GuardianManager {
     }
 
     // Create wallet commitment (hash of mnemonic - doesn't reveal the mnemonic)
-    const walletCommitment = sha256(mnemonic);
+    const walletCommitment = sha256Hex(mnemonic);
 
     // Split mnemonic into shares
     const mnemonicHex = Buffer.from(mnemonic, 'utf8').toString('hex');
@@ -63,7 +63,7 @@ export class GuardianManager {
       const share = shares[i];
 
       // Create commitment for this guardian
-      const commitment = sha256(guardian.publicKey + walletCommitment);
+      const commitment = sha256Hex(guardian.publicKey + walletCommitment);
 
       // Encrypt share for guardian
       const encryptedShare = await this.encryptShareForGuardian(share, guardian.publicKey);
@@ -128,7 +128,7 @@ export class GuardianManager {
     try {
       const encrypted = JSON.parse(encryptedData);
       const decrypted = await decrypt(encrypted, code);
-      const inviteData = JSON.parse(decrypted);
+      const inviteData = JSON.parse(new TextDecoder().decode(decrypted));
 
       // Generate guardian keypair
       const privateKey = getRandomBytes(32);
@@ -158,7 +158,7 @@ export class GuardianManager {
       throw new Error('Recovery not initialized');
     }
 
-    const commitment = sha256(publicKey);
+    const commitment = sha256Hex(publicKey);
 
     const guardian: Guardian = {
       id: bytesToHex(getRandomBytes(16)),
@@ -229,7 +229,7 @@ export class GuardianManager {
     // Derive shared secret using ECDH
     const guardianPubKeyBytes = hexToBytes(guardianPublicKey);
     const sharedPoint = secp256k1.getSharedSecret(ephemeralPrivateKey, guardianPubKeyBytes);
-    const sharedSecret = sha256(bytesToHex(sharedPoint));
+    const sharedSecret = sha256Hex(bytesToHex(sharedPoint));
 
     // Encrypt the share
     const shareData = JSON.stringify(share);
@@ -297,16 +297,4 @@ export class GuardianManager {
  */
 export function createGuardianManager(storage?: Storage): GuardianManager {
   return new GuardianManager(storage);
-}
-
-/**
- * Helper: Convert hex to bytes
- */
-function hexToBytes(hex: string): Uint8Array {
-  const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
-  const bytes = new Uint8Array(cleanHex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(cleanHex.substr(i * 2, 2), 16);
-  }
-  return bytes;
 }

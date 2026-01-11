@@ -6,14 +6,10 @@
  */
 
 import { getRandomBytes, bytesToHex, hexToBytes } from '../crypto/random';
+import type { ShamirShare } from './types';
 
 // Large prime for finite field operations (256-bit)
 const PRIME = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
-
-export interface ShamirShare {
-  index: number;
-  value: string;
-}
 
 /**
  * Split a secret into shares using Shamir's Secret Sharing

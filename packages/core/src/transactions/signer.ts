@@ -36,7 +36,7 @@ export class TransactionSigner {
    * @returns Signed transaction
    */
   sign(tx: LegacyTransaction | EIP1559Transaction): SignedTransaction {
-    const { serialized, hash } = this.builder.serializeUnsigned(tx);
+    const { hash } = this.builder.serializeUnsigned(tx);
 
     const signature = this.keyring.signTransaction(tx.from!, hash, tx.chainId!);
 

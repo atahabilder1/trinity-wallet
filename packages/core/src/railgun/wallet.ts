@@ -4,7 +4,7 @@
  * Manages Railgun wallet derivation and encrypted balances
  */
 
-import { sha256 } from '../crypto/hashing';
+import { sha256Hex } from '../crypto/hashing';
 import { getRandomBytes, bytesToHex } from '../crypto/random';
 import type {
   RailgunWallet,
@@ -41,11 +41,11 @@ export class RailgunWalletManager {
     // In production, this uses specific BIP derivation paths for Railgun
 
     const path = `m/44'/3820'/0'/${index}`;
-    const seed = sha256(mnemonic + path);
+    const seed = sha256Hex(mnemonic + path);
 
     // Derive viewing and spending keys
-    const viewingKey = sha256(seed + 'viewing');
-    const spendingKey = sha256(seed + 'spending');
+    const viewingKey = sha256Hex(seed + 'viewing');
+    const spendingKey = sha256Hex(seed + 'spending');
 
     // Generate Railgun address
     const railgunAddress = this.deriveRailgunAddress(viewingKey, spendingKey);
@@ -207,7 +207,7 @@ export class RailgunWalletManager {
     // In production, this follows Railgun's address derivation spec
     // The address encodes the master public viewing key
 
-    const combined = sha256(viewingKey + spendingKey);
+    const combined = sha256Hex(viewingKey + spendingKey);
     const addressBytes = combined.slice(0, 40); // 20 bytes
 
     return `${RAILGUN_ADDRESS_PREFIX}${addressBytes}`;

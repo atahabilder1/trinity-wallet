@@ -45,7 +45,6 @@ const KNOWN_SIGNATURES: Record<string, string> = {
   '0xe8e33700': 'addLiquidity(address,address,uint256,uint256,uint256,uint256,address,uint256)',
   '0xbaa2abde': 'removeLiquidity(address,address,uint256,uint256,uint256,address,uint256)',
   '0xa694fc3a': 'stake(uint256)',
-  '0x2e1a7d4d': 'withdraw(uint256)',
   '0x3d18b912': 'getReward()',
   '0xe9fad8ee': 'exit()',
 

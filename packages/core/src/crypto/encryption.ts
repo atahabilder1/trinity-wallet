@@ -8,7 +8,6 @@ import { deriveKey } from './hashing';
 
 // Constants
 const ALGORITHM = 'AES-GCM';
-const KEY_LENGTH = 256;
 const IV_LENGTH = 12; // 96 bits for GCM
 const TAG_LENGTH = 128; // 128 bits authentication tag
 const SALT_LENGTH = 32; // 256 bits salt
@@ -38,10 +37,6 @@ export async function encrypt(
   plaintext: string | Uint8Array,
   password: string
 ): Promise<EncryptedData> {
-  // Convert plaintext to bytes
-  const data =
-    typeof plaintext === 'string' ? new TextEncoder().encode(plaintext) : plaintext;
-
   // Generate random salt and IV
   const salt = getRandomBytes(SALT_LENGTH);
   const iv = getRandomBytes(IV_LENGTH);
@@ -52,21 +47,24 @@ export async function encrypt(
   // Import key for Web Crypto API
   const cryptoKey = await globalThis.crypto.subtle.importKey(
     'raw',
-    keyMaterial,
+    new Uint8Array(keyMaterial).buffer as ArrayBuffer,
     { name: ALGORITHM },
     false,
     ['encrypt']
   );
 
   // Encrypt data
+  const dataBuffer = typeof plaintext === 'string'
+    ? new TextEncoder().encode(plaintext).buffer as ArrayBuffer
+    : new Uint8Array(plaintext).buffer as ArrayBuffer;
   const ciphertext = await globalThis.crypto.subtle.encrypt(
     {
       name: ALGORITHM,
-      iv: iv,
+      iv: new Uint8Array(iv).buffer as ArrayBuffer,
       tagLength: TAG_LENGTH,
     },
     cryptoKey,
-    data
+    dataBuffer
   );
 
   // Clear sensitive data from memory
@@ -107,7 +105,7 @@ export async function decrypt(
   // Import key for Web Crypto API
   const cryptoKey = await globalThis.crypto.subtle.importKey(
     'raw',
-    keyMaterial,
+    new Uint8Array(keyMaterial).buffer as ArrayBuffer,
     { name: ALGORITHM },
     false,
     ['decrypt']
@@ -118,11 +116,11 @@ export async function decrypt(
     const plaintext = await globalThis.crypto.subtle.decrypt(
       {
         name: ALGORITHM,
-        iv: iv,
+        iv: new Uint8Array(iv).buffer as ArrayBuffer,
         tagLength: TAG_LENGTH,
       },
       cryptoKey,
-      ciphertext
+      new Uint8Array(ciphertext).buffer as ArrayBuffer
     );
 
     // Clear sensitive data from memory

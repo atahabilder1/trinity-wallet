@@ -371,7 +371,46 @@ export class TokenBalanceManager {
 }
 
 // Helper function to create the manager
-export async function getNonZeroBalances(ownerAddress: string): Promise<TokenBalance[]> {
+export async function getNonZeroBalances(_ownerAddress: string): Promise<TokenBalance[]> {
   // This would be called from the instance
   return [];
+}
+
+/**
+ * Get native balance for an address on a specific RPC
+ */
+export async function getNativeBalance(address: string, rpcUrl: string): Promise<bigint> {
+  try {
+    const response = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_getBalance',
+        params: [address, 'latest'],
+      }),
+    });
+    const data = await response.json();
+    if (data.result) {
+      return BigInt(data.result);
+    }
+    return 0n;
+  } catch {
+    return 0n;
+  }
+}
+
+/**
+ * Get token balances for an address (placeholder)
+ */
+export async function getTokenBalances(
+  _address: string,
+  _tokenAddresses: string[],
+  _rpcUrl: string
+): Promise<Map<string, bigint>> {
+  const balances = new Map<string, bigint>();
+  // In production, this would use multicall for efficiency
+  // For now, return empty map
+  return balances;
 }

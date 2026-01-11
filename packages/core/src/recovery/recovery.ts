@@ -4,7 +4,7 @@
  * Handles the recovery process using guardian shares
  */
 
-import { sha256 } from '../crypto/hashing';
+import { sha256Hex } from '../crypto/hashing';
 import { decrypt } from '../crypto/encryption';
 import { combineShares, verifyShares } from './shamir';
 import { createZKRecoveryProof, verifyZKProof } from './zkproof';
@@ -15,7 +15,7 @@ import type {
   ShamirShare,
   Guardian,
 } from './types';
-import { bytesToHex, getRandomBytes } from '../crypto/random';
+import { bytesToHex, hexToBytes, getRandomBytes } from '../crypto/random';
 
 // ECDH for decryption
 import { secp256k1 } from '@noble/curves/secp256k1';
@@ -42,7 +42,7 @@ export class RecoveryManager {
     requesterPrivateKey: Uint8Array
   ): Promise<RecoveryRequest> {
     // Create wallet commitment (doesn't reveal address)
-    const walletCommitment = sha256(walletAddress);
+    const walletCommitment = sha256Hex(walletAddress);
 
     // Create ZK proof that requester is legitimate
     const requesterProof = await createZKRecoveryProof(walletAddress, requesterPrivateKey);
@@ -239,7 +239,7 @@ export class RecoveryManager {
       // Derive shared secret using ECDH
       const ephemeralPubKey = hexToBytes(encrypted.ephemeralPublicKey);
       const sharedPoint = secp256k1.getSharedSecret(privateKey, ephemeralPubKey);
-      const sharedSecret = sha256(bytesToHex(sharedPoint));
+      const sharedSecret = sha256Hex(bytesToHex(sharedPoint));
 
       // Decrypt
       const decrypted = await decrypt(
@@ -247,11 +247,12 @@ export class RecoveryManager {
           ciphertext: encrypted.ciphertext,
           iv: encrypted.nonce,
           salt: '', // Not used in this context
+          version: 1,
         },
         sharedSecret
       );
 
-      return JSON.parse(decrypted);
+      return JSON.parse(new TextDecoder().decode(decrypted));
     } catch {
       return null;
     }
@@ -296,25 +297,4 @@ export class RecoveryManager {
  */
 export function createRecoveryManager(storage?: Storage): RecoveryManager {
   return new RecoveryManager(storage);
-}
-
-/**
- * Helper: Convert hex to bytes
- */
-function hexToBytes(hex: string): Uint8Array {
-  const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
-  const bytes = new Uint8Array(cleanHex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(cleanHex.substr(i * 2, 2), 16);
-  }
-  return bytes;
-}
-
-/**
- * Helper: Convert bytes to hex
- */
-function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
 }

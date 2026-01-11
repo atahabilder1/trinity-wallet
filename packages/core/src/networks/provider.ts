@@ -3,9 +3,9 @@
  * Handles RPC connections with fallback support
  */
 
-import { JsonRpcProvider, Network, FetchRequest } from 'ethers';
-import type { ChainConfig, ConnectionState, BlockInfo, GasPrice, FeeEstimate } from './types';
-import { CHAINS_BY_ID, getChainById } from './chains';
+import { JsonRpcProvider, Network } from 'ethers';
+import { ConnectionState, type ChainConfig, type BlockInfo, type GasPrice, type FeeEstimate } from './types';
+import { getChainById } from './chains';
 
 /**
  * Provider manager for a single chain
@@ -14,7 +14,7 @@ export class ChainProvider {
   private chainConfig: ChainConfig;
   private currentRpcIndex: number = 0;
   private provider: JsonRpcProvider | null = null;
-  private connectionState: ConnectionState = 'disconnected';
+  private connectionState: ConnectionState = ConnectionState.DISCONNECTED;
   private lastError: Error | null = null;
 
   constructor(chainConfig: ChainConfig) {
@@ -47,7 +47,7 @@ export class ChainProvider {
    * Tries RPCs in order until one succeeds
    */
   async connect(): Promise<boolean> {
-    this.connectionState = 'connecting';
+    this.connectionState = ConnectionState.CONNECTING;
     this.lastError = null;
 
     for (let i = 0; i < this.chainConfig.rpcUrls.length; i++) {
@@ -64,7 +64,7 @@ export class ChainProvider {
 
         this.provider = provider;
         this.currentRpcIndex = i;
-        this.connectionState = 'connected';
+        this.connectionState = ConnectionState.CONNECTED;
 
         return true;
       } catch (error) {
@@ -73,7 +73,7 @@ export class ChainProvider {
       }
     }
 
-    this.connectionState = 'error';
+    this.connectionState = ConnectionState.ERROR;
     return false;
   }
 
@@ -85,7 +85,7 @@ export class ChainProvider {
       this.provider.destroy();
       this.provider = null;
     }
-    this.connectionState = 'disconnected';
+    this.connectionState = ConnectionState.DISCONNECTED;
   }
 
   /**
@@ -167,9 +167,13 @@ export class ChainProvider {
 
     const feeData = await this.provider!.getFeeData();
 
+    // Get base fee from latest block for EIP-1559 chains
+    const block = await this.provider!.getBlock('latest');
+    const baseFee = block?.baseFeePerGas ?? undefined;
+
     return {
       gasPrice: feeData.gasPrice ?? 0n,
-      baseFee: feeData.lastBaseFeePerGas ?? undefined,
+      baseFee,
       maxPriorityFee: feeData.maxPriorityFeePerGas ?? undefined,
       maxFee: feeData.maxFeePerGas ?? undefined,
     };
@@ -195,7 +199,8 @@ export class ChainProvider {
     this.ensureConnected();
 
     const feeData = await this.provider!.getFeeData();
-    const baseFee = feeData.lastBaseFeePerGas ?? feeData.gasPrice ?? 0n;
+    const block = await this.provider!.getBlock('latest');
+    const baseFee = block?.baseFeePerGas ?? feeData.gasPrice ?? 0n;
 
     if (this.chainConfig.supportsEip1559 && feeData.maxFeePerGas) {
       // EIP-1559 estimation
@@ -293,7 +298,7 @@ export class ChainProvider {
   }
 
   private ensureConnected(): void {
-    if (!this.provider || this.connectionState !== 'connected') {
+    if (!this.provider || this.connectionState !== ConnectionState.CONNECTED) {
       throw new Error('Provider not connected');
     }
   }
@@ -337,7 +342,7 @@ export class ProviderManager {
   async switchChain(chainId: number): Promise<boolean> {
     const provider = this.getChainProvider(chainId);
 
-    if (provider.getState() !== 'connected') {
+    if (provider.getState() !== ConnectionState.CONNECTED) {
       const connected = await provider.connect();
       if (!connected) {
         return false;
